@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行业洞察</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .tag-btn {
+            transition: all 0.2s ease;
+        }
+        .tag-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .table-row {
+            transition: all 0.2s ease;
+        }
+        .table-row:hover {
+            background-color: #f8fafc;
+        }
+        .row-spacing-compact td {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        .row-spacing-normal td {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .row-spacing-loose td {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .spacing-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        /* Prevent text wrapping */
+        .nowrap {
+            white-space: nowrap;
+        }
+        .ellipsis {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-[1400px] mx-auto">
+        
+        <!-- Header -->
+        <div class="glass-card rounded-2xl p-6 mb-6 shadow-xl">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">行业洞察</h1>
+                    <p class="text-gray-500 mt-1">各账号套餐内容追踪</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="content-admin.html" class="tag-btn px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl text-sm font-medium flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        管理内容
+                    </a>
+                    <button onclick="loadData()" class="tag-btn px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        刷新数据
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters & Controls -->
+        <div class="glass-card rounded-2xl p-4 mb-6 shadow-lg">
+            <div class="flex flex-col xl:flex-row gap-4 justify-between">
+                <div class="flex flex-col lg:flex-row gap-4 flex-1">
+                    <div class="w-full lg:w-56">
+                        <input type="text" 
+                               id="searchInput" 
+                               placeholder="搜索目的地、景点、酒店..." 
+                               class="search-input w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 transition-all">
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2" id="filterButtons">
+                        <span class="text-sm text-gray-500 mr-1">账号:</span>
+                        <button class="filter-btn active px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all" data-filter="all">全部</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="嬉游">嬉游</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="旅行雷达">旅行雷达</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="精明常旅客">精明常旅客</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="Aires">Aires</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="ikids">ikids</button>
+                        <span class="text-sm text-gray-500 mr-1 ml-2">平台:</span>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="飞猪">飞猪</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="携程">携程</button>
+                        <button class="filter-btn px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50" data-filter="美团">美团</button>
+                    </div>
+                </div>
+                <!-- Row Spacing Control -->
+                <div class="flex items-center gap-2 xl:border-l xl:border-gray-200 xl:pl-4">
+                    <span class="text-sm text-gray-500 whitespace-nowrap">行间距:</span>
+                    <div class="flex gap-1">
+                        <button onclick="setRowSpacing('compact')" class="spacing-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-all" data-spacing="compact">紧凑</button>
+                        <button onclick="setRowSpacing('normal')" class="spacing-btn active px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-all" data-spacing="normal">标准</button>
+                        <button onclick="setRowSpacing('loose')" class="spacing-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-all" data-spacing="loose">宽松</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="glass-card px-4 py-3 rounded-xl text-center">
+                <div class="text-2xl font-bold text-indigo-600" id="totalCount">0</div>
+                <div class="text-xs text-gray-500">总内容数</div>
+            </div>
+            <div class="glass-card px-4 py-3 rounded-xl text-center">
+                <div class="text-2xl font-bold text-orange-600" id="feizhuCount">0</div>
+                <div class="text-xs text-gray-500">飞猪</div>
+            </div>
+            <div class="glass-card px-4 py-3 rounded-xl text-center">
+                <div class="text-2xl font-bold text-blue-600" id="xiechengCount">0</div>
+                <div class="text-xs text-gray-500">携程</div>
+            </div>
+            <div class="glass-card px-4 py-3 rounded-xl text-center">
+                <div class="text-2xl font-bold text-yellow-600" id="meituanCount">0</div>
+                <div class="text-xs text-gray-500">美团</div>
+            </div>
+        </div>
+
+        <!-- Content Table -->
+        <div class="glass-card rounded-2xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-indigo-50 to-purple-50">
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">日期</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">公众号</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">分类</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">目的地</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">景点</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">酒店</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">平台</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">链接</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">用户留言</th>
+                            <th class="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap" style="min-width:80px;">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contentTable" class="divide-y divide-gray-100">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden glass-card rounded-2xl p-12 text-center mt-6">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">未找到匹配内容</h3>
+            <p class="text-gray-500">请尝试其他搜索关键词</p>
+        </div>
+    </div>
+
+    <script>
+        // Default data from Excel (sorted by date descending)
+        const defaultData = [
+  {
+    "date": "03月24日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "武汉",
+    "attraction": "",
+    "hotel": "武汉开元森泊",
+    "platform": "美团",
+    "link": "https://mp.weixin.qq.com/s/GcRuyM0pN6XAYd0BB9xV8A",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "03月16日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "嘉兴",
+    "attraction": "",
+    "hotel": "开元森泊",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/SidJ_QPkKSZUvhlqr_dB9A",
+    "description": "苏超关联",
+    "note": ""
+  },
+  {
+    "date": "03月14日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "湖州",
+    "attraction": "龙之梦",
+    "hotel": "园内7家酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/VMbNxqwLCAdf9qNReCjbQQ",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "03月12日",
+    "gzh": "嬉游",
+    "category": "海南专场",
+    "destination": "万宁",
+    "attraction": "中旅逐浪",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/wMt4aG5bx-Z7KYUcNrFTug",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "03月12日",
+    "gzh": "精明常旅客",
+    "category": "携程318",
+    "destination": "宜兴",
+    "attraction": "窑湖小镇",
+    "hotel": "窑厂度假酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/bk3KjF5nB8JXUMFbsfQWGQ",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "03月11日",
+    "gzh": "嬉游",
+    "category": "专篇",
+    "destination": "宜兴",
+    "attraction": "窑湖小镇",
+    "hotel": "窑厂度假酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/T1NnJJDJ26yspHJ5Ss-Rew",
+    "description": "濮院，隐龙谷，龙之梦，万岁山，",
+    "note": "用户互动留言询问窑湖小镇的问题非常多"
+  },
+  {
+    "date": "03月10日",
+    "gzh": "嬉游",
+    "category": "专篇",
+    "destination": "金华",
+    "attraction": "横店",
+    "hotel": "入戏里酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/OUNPI6A3SplFILHlZIoBWg",
+    "description": "希望有飞猪的横店，花呗更友好",
+    "note": ""
+  },
+  {
+    "date": "03月09日",
+    "gzh": "嬉游",
+    "category": "周一见",
+    "destination": "青岛",
+    "attraction": "",
+    "hotel": "海泉湾皇冠假日酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/7EZ0JqWJvAfaoQ1By0fF5w",
+    "description": "乌村，响沙湾莲花，上海迪士尼",
+    "note": "非G35酒景套餐"
+  },
+  {
+    "date": "03月07日",
+    "gzh": "嬉游",
+    "category": "万达专场",
+    "destination": "",
+    "attraction": "",
+    "hotel": "长白山万达10店通兑",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/sJRNHQZSfIOpD8LC18oqLA",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "03月02日",
+    "gzh": "嬉游",
+    "category": "周一见 飞猪春促",
+    "destination": "宁夏",
+    "attraction": "沙漠星星",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/qQ7AhKC004IZTKHEVNxwDg",
+    "description": "开封，环球影城，响沙湾莲花，恐龙园，郑州银基，",
+    "note": "酒景套餐"
+  },
+  {
+    "date": "03月02日",
+    "gzh": "旅行雷达",
+    "category": "飞猪春促",
+    "destination": "G35",
+    "attraction": "沙漠星星/长隆/海昌/恐龙园/融创",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/5kQTn30eDpDvcFaRVgBSfw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "03月01日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "长白山",
+    "attraction": "华美胜地度假区",
+    "hotel": "郝力克，松果里，瑞士，美憬阁，原乡民俗",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/6Q76dy9e0EayhC07X_EY7Q",
+    "description": "",
+    "note": "酒店套餐"
+  },
+  {
+    "date": "02月28日",
+    "gzh": "嬉游",
+    "category": "春促",
+    "destination": "上海/郑州",
+    "attraction": "海昌",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/u6lYC7Af6eOExnBw6yshAw",
+    "description": "万岁山，乐高，武汉森泊（提了很多次），迪士尼，银基，方特，窑湖小镇，湖州长颈鹿庄园，",
+    "note": "酒景套餐"
+  },
+  {
+    "date": "02月27日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "溧阳",
+    "attraction": "天目湖半山温泉",
+    "hotel": "涵田度假村",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/_TmjIJD2zXHJ7CWVnoWkdA",
+    "description": "扬州，绍兴，新疆，北京",
+    "note": ""
+  },
+  {
+    "date": "02月25日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "广东",
+    "attraction": "长隆",
+    "hotel": "广东，珠海，清远的酒套",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/OXeFolw0QvDmljm-qyn-gw",
+    "description": "泉州欧乐堡，中卫沙漠，乐高，红山动物园，",
+    "note": "酒景套餐"
+  },
+  {
+    "date": "02月07日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "吉林",
+    "attraction": "松花湖度假区",
+    "hotel": "瞻云，王子酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/52P9XiYhgNVYqUt9olGvRg",
+    "description": "长白山，",
+    "note": "酒景套餐"
+  },
+  {
+    "date": "02月04日",
+    "gzh": "Aires",
+    "category": "飞猪vip",
+    "destination": "海宁",
+    "attraction": "盐官潮乐之城",
+    "hotel": "旧城酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/3OkbT-a4AWn06DH9M0YD1Q",
+    "description": "官旗的酒店套餐",
+    "note": ""
+  },
+  {
+    "date": "02月02日",
+    "gzh": "嬉游",
+    "category": "周一见",
+    "destination": "江门",
+    "attraction": "赤坎度假区",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/d8LFQ0fbKBiCumLf7b05zg",
+    "description": "酒店套餐",
+    "note": ""
+  },
+  {
+    "date": "02月01日",
+    "gzh": "ikids",
+    "category": "",
+    "destination": "湖州",
+    "attraction": "莫干山开元森泊",
+    "hotel": "哇哩哇国/木屋",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/I89Og_zjQAuVPZICJ1BtZw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月31日",
+    "gzh": "旅行雷达",
+    "category": "",
+    "destination": "湖北",
+    "attraction": "武汉开元森泊",
+    "hotel": "开元森泊度假酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/w_9ETc3bWsdKSSi-yzcSyQ",
+    "description": "消费券-酒景套餐",
+    "note": ""
+  },
+  {
+    "date": "01月27日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "舟山",
+    "attraction": "双人水乐园/幻想岛",
+    "hotel": "舟山保利郡雅开元森泊度假酒店",
+    "platform": "美团",
+    "link": "https://mp.weixin.qq.com/s/KTg9cssBtd1R4UOjNMJGcw",
+    "description": "大湾区，龙之梦",
+    "note": ""
+  },
+  {
+    "date": "01月26日",
+    "gzh": "旅行雷达",
+    "category": "",
+    "destination": "无锡",
+    "attraction": "热雪奇迹",
+    "hotel": "雪浪宋品酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/v8wKUxmjaWTAbo0DETQiwg",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月22日",
+    "gzh": "旅行雷达",
+    "category": "",
+    "destination": "台州",
+    "attraction": "方特",
+    "hotel": "熊出没酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/2JqDkw2qyHVOS3P-y-jgGw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月21日",
+    "gzh": "Aires",
+    "category": "飞猪vip",
+    "destination": "香港",
+    "attraction": "香港迪士尼",
+    "hotel": "乐园酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/Ww3xJF4A8NcffKmqJFadvg",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月20日",
+    "gzh": "嬉游",
+    "category": "携程318-第二波",
+    "destination": "杭州",
+    "attraction": "杭州森泊双园",
+    "hotel": "开元森泊",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/DMj5tWtP-ROppv9xCh_axw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月20日",
+    "gzh": "精明常旅客",
+    "category": "",
+    "destination": "台州",
+    "attraction": "方特",
+    "hotel": "熊出没酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/2-rbmcQyaF4WZaeWJf92nw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月19日",
+    "gzh": "ikids",
+    "category": "",
+    "destination": "桐乡",
+    "attraction": "濮院",
+    "hotel": "梅尚度假酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/3LDbCH9yN-6Xa6c6otil8A",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月18日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "温州",
+    "attraction": "温州乐园/极地海洋世界",
+    "hotel": "温州乐园园内酒店",
+    "platform": "美团",
+    "link": "https://mp.weixin.qq.com/s/gVlVdNwFdWZo0c10lYtPDw",
+    "description": "福建福州，泉州欧乐堡（提名很多次），长隆，",
+    "note": ""
+  },
+  {
+    "date": "01月17日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "济南",
+    "attraction": "九如山",
+    "hotel": "九如山梦枕书香民宿/红颜容木桶酒店/猫窝民宿",
+    "platform": "美团",
+    "link": "https://mp.weixin.qq.com/s/JK6w0EkV4x3l5N05_VDUjQ",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月15日",
+    "gzh": "ikids",
+    "category": "",
+    "destination": "宜兴",
+    "attraction": "窑湖小镇",
+    "hotel": "景区内酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/a4-9K2UVWWjG7pnBfB_aLg",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月14日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "嘉兴",
+    "attraction": "乌镇",
+    "hotel": "乌村",
+    "platform": "美团",
+    "link": "https://mp.weixin.qq.com/s/oj7ye7-Pwk1ySSzK9WEs9Q",
+    "description": "太仓cm滑雪，港迪，濮院，上迪春促，",
+    "note": ""
+  },
+  {
+    "date": "01月14日",
+    "gzh": "精明常旅客",
+    "category": "飞猪vip",
+    "destination": "湖州",
+    "attraction": "龙之梦动物世界",
+    "hotel": "龙之梦酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/2-rbmcQyaF4WZaeWJf92nw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月14日",
+    "gzh": "Aires",
+    "category": "飞猪vip",
+    "destination": "其他货品与精明常旅客一样",
+    "attraction": "",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/yTYnKrXTzpw3Q8HEYuRSUQ",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月13日",
+    "gzh": "嬉游",
+    "category": "携程318",
+    "destination": "安吉",
+    "attraction": "奇幻嘉乐比",
+    "hotel": "开元嘉乐比",
+    "platform": "携程",
+    "link": "",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月12日",
+    "gzh": "嬉游",
+    "category": "周一见-携程318-江浙沪",
+    "destination": "湖州",
+    "attraction": "",
+    "hotel": "长颈鹿庄园",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/bBV6JzMxWmcIBaTi9I7DYw",
+    "description": "要大湾区（广东，潮汕，珠海）/海南套餐，方特套餐，安吉中南度假村，长隆，上迪",
+    "note": ""
+  },
+  {
+    "date": "01月12日",
+    "gzh": "Aires",
+    "category": "携程318",
+    "destination": "湖州",
+    "attraction": "",
+    "hotel": "长颈鹿庄园",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/-oFtHSBMqJWKjYmEZfmLeA",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月12日",
+    "gzh": "精明常旅客",
+    "category": "携程318",
+    "destination": "货品与Aires，嬉游类似",
+    "attraction": "",
+    "hotel": "",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/PwltjfPaGiCEFl4UGbMXYw",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月12日",
+    "gzh": "旅行雷达",
+    "category": "携程318-末条",
+    "destination": "绍兴",
+    "attraction": "山之王国/酷玩王国",
+    "hotel": "东方山水金沙酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/yEPXRwOnvcr4cLUQJqMuug",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月07日",
+    "gzh": "精明常旅客",
+    "category": "飞猪冰雪专题",
+    "destination": "吉林",
+    "attraction": "北大湖雪场",
+    "hotel": "北大湖假日酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/2KoLO6Ab5S5YfALpkvrm7Q",
+    "description": "",
+    "note": "酒店官旗"
+  },
+  {
+    "date": "01月07日",
+    "gzh": "旅行雷达",
+    "category": "飞猪冰雪",
+    "destination": "商品同“精明常旅客”，放在了首条合集的最后",
+    "attraction": "",
+    "hotel": "",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/_3VPQTTH2v7IyLFchVPSsg",
+    "description": "",
+    "note": ""
+  },
+  {
+    "date": "01月05日",
+    "gzh": "嬉游",
+    "category": "周一见",
+    "destination": "徐州",
+    "attraction": "开元森泊幻境乐园",
+    "hotel": "开元名都大酒店",
+    "platform": "携程",
+    "link": "https://mp.weixin.qq.com/s/IJ7H1IYUxnWLf1PrMclHxg",
+    "description": "福建/广东/潮汕 春节不加价，家庭出游优惠",
+    "note": ""
+  },
+  {
+    "date": "01月05日",
+    "gzh": "旅行雷达",
+    "category": "首条专篇",
+    "destination": "万宁",
+    "attraction": "",
+    "hotel": "中旅逐浪",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/8XfOBzLYsCdVm4tovrJH0w",
+    "description": "",
+    "note": "度假酒景套餐"
+  },
+  {
+    "date": "12月29日",
+    "gzh": "嬉游",
+    "category": "周一见",
+    "destination": "广州/清远",
+    "attraction": "长隆",
+    "hotel": "园内酒店",
+    "platform": "飞猪",
+    "link": "https://mp.weixin.qq.com/s/MyO45XvEV03P9PBq_6o-pQ",
+    "description": "福建泉州/福州/漳州套餐，江浙沪周末泡汤推荐，春节不加价的海南，要23月的长隆，成都重庆周边游，秦皇岛阿那亚，金华武义，广西北海。",
+    "note": ""
+  },
+  {
+    "date": "12月28日",
+    "gzh": "嬉游",
+    "category": "",
+    "destination": "广东",
+    "attraction": "赤坎度假区",
+    "hotel": "",
+    "platform": "无",
+    "link": "https://mp.weixin.qq.com/s/OQNmpSEhSaegA3fxQ1Uk6w",
+    "description": "想要元旦/春节的套餐",
+    "note": ""
+  }
+];
+
+        let contentData = [];
+        let currentRowSpacing = 'normal';
+
+        // Platform colors and styles - same as link button style
+        const platformStyles = {
+            "飞猪": "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
+            "携程": "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
+            "美团": "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white",
+            "无": "bg-gradient-to-r from-gray-500 to-gray-600 text-white"
+        };
+
+        const gzhStyles = {
+            "嬉游": "bg-gradient-to-r from-indigo-500 to-purple-500 text-white",
+            "旅行雷达": "bg-gradient-to-r from-pink-500 to-rose-500 text-white",
+            "精明常旅客": "bg-gradient-to-r from-cyan-500 to-blue-500 text-white",
+            "Aires": "bg-gradient-to-r from-emerald-500 to-teal-500 text-white",
+            "ikids": "bg-gradient-to-r from-violet-500 to-purple-500 text-white"
+        };
+
+        // Custom sort: 12月放最后，其他按月份降序
+        function sortByDate(data) {
+            return data.sort((a, b) => {
+                try {
+                    const [ma, da] = a.date.replace('月', '-').replace('日', '').split('-').map(Number);
+                    const [mb, db] = b.date.replace('月', '-').replace('日', '').split('-').map(Number);
+                    // If month is 12, put it at the end
+                    if (ma === 12 && mb !== 12) return 1;
+                    if (ma !== 12 && mb === 12) return -1;
+                    if (ma === 12 && mb === 12) return da - db;
+                    // Otherwise descending order
+                    if (ma !== mb) return mb - ma;
+                    return db - da;
+                } catch {
+                    return 0;
+                }
+            });
+        }
+
+        // Load data from localStorage, fallback to defaultData
+        function loadData() {
+            const stored = localStorage.getItem('contentData');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && parsed.length > 0) {
+                        contentData = sortByDate(parsed);
+                    } else {
+                        contentData = sortByDate([...defaultData]);
+                    }
+                } catch (e) {
+                    contentData = sortByDate([...defaultData]);
+                }
+            } else {
+                contentData = sortByDate([...defaultData]);
+            }
+            updateStats();
+            filterData();
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalCount').textContent = contentData.length;
+            document.getElementById('feizhuCount').textContent = contentData.filter(i => i.platform === '飞猪').length;
+            document.getElementById('xiechengCount').textContent = contentData.filter(i => i.platform === '携程').length;
+            document.getElementById('meituanCount').textContent = contentData.filter(i => i.platform === '美团').length;
+        }
+
+        // Set row spacing
+        function setRowSpacing(spacing) {
+            currentRowSpacing = spacing;
+            document.querySelectorAll('.spacing-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.spacing === spacing) btn.classList.add('active');
+            });
+            filterData();
+        }
+
+        // Render table
+        function renderTable(data) {
+            const tbody = document.getElementById('contentTable');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            tbody.innerHTML = data.map((item, index) => `
+                <tr class="table-row animate-fade-in row-spacing-${currentRowSpacing}" style="animation-delay: ${index * 0.03}s">
+                    <td class="px-3 text-sm text-gray-700 whitespace-nowrap">${item.date}</td>
+                    <td class="px-3">
+                        <span class="tag-btn inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${gzhStyles[item.gzh] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'}">
+                            ${item.gzh}
+                        </span>
+                    </td>
+                    <td class="px-3 text-sm text-gray-600 whitespace-nowrap">${item.category || '-'}</td>
+                    <td class="px-3 text-sm font-medium text-gray-800 whitespace-nowrap ellipsis" style="max-width:150px;" title="${item.destination}">${item.destination || '-'}</td>
+                    <td class="px-3 text-sm text-gray-600 whitespace-nowrap ellipsis" style="max-width:150px;" title="${item.attraction}">${item.attraction || '-'}</td>
+                    <td class="px-3 text-sm text-gray-700 whitespace-nowrap ellipsis" style="max-width:180px;" title="${item.hotel}">${item.hotel || '-'}</td>
+                    <td class="px-3">
+                        <span class="tag-btn inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${platformStyles[item.platform] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'}">
+                            ${item.platform || '-'}
+                        </span>
+                    </td>
+                    <td class="px-3">
+                        ${item.link ? `<a href="${item.link}" target="_blank" class="tag-btn inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-medium rounded-lg">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                            查看
+                        </a>` : '-'}
+                    </td>
+                    <td class="px-3 text-sm text-gray-500" style="max-width:200px;">
+                        <div class="truncate" title="${item.description}">${item.description || '-'}</div>
+                    </td>
+                    <td class="px-3 text-sm text-gray-500 whitespace-nowrap">${item.note || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Filter functionality
+        let currentFilter = 'all';
+        let searchTerm = '';
+
+        function filterData() {
+            let filtered = contentData;
+            
+            if (currentFilter !== 'all') {
+                // Check if currentFilter matches gzh OR platform
+                filtered = filtered.filter(item => 
+                    item.gzh === currentFilter || item.platform === currentFilter
+                );
+            }
+            
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(item => 
+                    (item.destination && item.destination.toLowerCase().includes(term)) ||
+                    (item.attraction && item.attraction.toLowerCase().includes(term)) ||
+                    (item.hotel && item.hotel.toLowerCase().includes(term)) ||
+                    (item.category && item.category.toLowerCase().includes(term)) ||
+                    (item.gzh && item.gzh.toLowerCase().includes(term))
+                );
+            }
+            
+            renderTable(filtered);
+        }
+
+        // Event listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                filterData();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            filterData();
+        });
+
+        // Initial load
+        loadData();
+    </script>
+</body>
+</html>
